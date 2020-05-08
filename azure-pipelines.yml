@@ -1,8 +1,14 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
+resources:
+  repositories:
+  - repository: AnsibleRepo
+    type: github
+    endpoint: github.com_kgejara
+    name: kgejara/AnsibleRepo
+  - repository: TerraformRepo
+    type: github
+    endpoint: github.com_kgejara
+    name: kgejara/TerraformRepo
+    
 trigger:
 - master
 
@@ -10,13 +16,35 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- checkout: self
+- checkout: AnsibleRepo
+- checkout: TerraformRepo
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
-- task: TerraformInstaller@0
+- script: dir $(Build.SourcesDirectory)
+
+- task: CopyFiles@2
   inputs:
-    terraformVersion: '0.12.20'
+    SourceFolder: 'ApplicationRepo/Code'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/Code'
+    OverWrite: true
+    
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'AnsibleRepo/AnsibleScripts'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/AnsibleScripts'
+    OverWrite: true
+    
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'TerraformRepo/terraform-aws'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/terraform-aws'
+    OverWrite: true
+    
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
