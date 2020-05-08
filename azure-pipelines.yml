@@ -8,6 +8,10 @@ resources:
     type: github
     endpoint: github.com_kgejara
     name: kgejara/TerraformRepo
+  - repository: ApplicationRepo
+    type: github
+    endpoint: github.com_kgejara
+    name: kgejara/ApplicationRepo
     
 trigger:
 - master
@@ -16,9 +20,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: self
-- checkout: AnsibleRepo
 - checkout: TerraformRepo
+- checkout: AnsibleRepo
+- checkout: ApplicationRepo
 
 - script: dir $(Build.SourcesDirectory)
 
