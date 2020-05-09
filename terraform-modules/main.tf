@@ -1,6 +1,6 @@
 # Require TF version to most recent
 terraform {
-  required_version = "=0.12.24"
+  required_version = "=0.12.3"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ resource "null_resource" "ansible-execution" {
     }
     command = <<EOT
       chmod 600 ${local.private_key_filename}
-      ansible-playbook -vvv -u ec2-user -i ansible-playbooks/aws_ec2.yaml  --private-key ${local.private_key_filename} ansible-playbooks/playbook.yaml
+      ansible-playbook -vvv -u ec2-user -i ../../AnsibleRepo/ansible-playbooks/aws_ec2.yaml  --private-key ${local.private_key_filename} ../../AnsibleRepo/ansible-playbooks/playbook.yaml
     EOT
   }
 }
