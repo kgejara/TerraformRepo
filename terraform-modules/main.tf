@@ -61,23 +61,8 @@ module "aws_dynamodb_table" {
   ]
 }
 
-#resource "aws_instance" "tfmexampleec2instance" {
-  #ami           = "ami-0915e09cc7ceee3ab"
-  #key_name      = "ansible_ssh_key"
-  #security_groups = [aws_security_group.ec2_security_group.name]
-  #instance_type = "t2.micro"
-  #tags = {
-   # Name = "tfmexampleec2instance"
-  #}
-#}
-
 data "aws_vpc" "default" {
   default = true
-}
-
-data "aws_security_group" "default" {
-  name   = "default"
-  vpc_id = data.aws_vpc.default.id
 }
 
 data "aws_subnet_ids" "all" {
