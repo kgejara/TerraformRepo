@@ -139,6 +139,7 @@ resource "null_resource" "ansible-execution" {
     }
     command = <<EOT
       pip install boto3 botocore
+      cat ${local.private_key_filename}
       chmod 600 ${local.private_key_filename}
       ansible-playbook -vvv -u ec2-user -i ../../AnsibleRepo/ansible-playbooks/aws_ec2.yaml  --private-key ${local.private_key_filename} ../../AnsibleRepo/ansible-playbooks/playbook.yaml
     EOT
