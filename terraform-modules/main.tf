@@ -116,7 +116,7 @@ module "security_group" {
   ]
 }
 
-module "ec2_with_t2_unlimited" {
+module "tfmexampleec2instance" {
   source = "terraform-aws-modules/ec2-instance/aws"
   instance_count = 1
   name          = "tfmexampleec2instance"
@@ -142,6 +142,7 @@ resource "null_resource" "ansible-execution" {
       ansible-playbook -vvv -u ec2-user -i ../../AnsibleRepo/ansible-playbooks/aws_ec2.yaml  --private-key ${local.private_key_filename} ../../AnsibleRepo/ansible-playbooks/playbook.yaml
     EOT
   }
+depends_on = [module.tfmexampleec2instance]
 }
 
 locals {
