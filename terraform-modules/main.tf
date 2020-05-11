@@ -31,40 +31,102 @@ terraform {
 # ---------------------------------------------------------------------------------------------------------------------
 # CREATE THE S3 BUCKET
 # ---------------------------------------------------------------------------------------------------------------------
+module "aws_s3_bucket" {
+  source = "terraform-aws-modules/s3-bucket/aws"
 
-resource "aws_s3_bucket" "remote_state" {
   bucket = var.bucket_name
   acl    = "private"
 
-  versioning {
+  versioning = {
     enabled = true
   }
+
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
 # CREATE THE DYNAMODB TABLE
 # ---------------------------------------------------------------------------------------------------------------------
-
-resource "aws_dynamodb_table" "terraform_locks" {
-  name           = var.dynamodb_lock_table_name
+module "aws_dynamodb_table" {
+  source   = "terraform-aws-modules/dynamodb-table/aws"
+  name     = var.dynamodb_lock_table_name
   read_capacity  = 1
   write_capacity = 1
-  hash_key       = "LockID"
+  hash_key = "LockID"
 
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
+  attributes = [
+    {
+      name = "LockID"
+      type = "S"
+    }
+  ]
 }
 
-resource "aws_instance" "tfmexampleec2instance" {
+#resource "aws_instance" "tfmexampleec2instance" {
+  #ami           = "ami-0915e09cc7ceee3ab"
+  #key_name      = "ansible_ssh_key"
+  #security_groups = [aws_security_group.ec2_security_group.name]
+  #instance_type = "t2.micro"
+  #tags = {
+   # Name = "tfmexampleec2instance"
+  #}
+#}
+
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_security_group" "default" {
+  name   = "default"
+  vpc_id = data.aws_vpc.default.id
+}
+
+data "aws_subnet_ids" "all" {
+  vpc_id = data.aws_vpc.default.id
+}
+
+module "security_group" {
+  source = "terraform-aws-modules/security-group/aws"
+  name        = "nginx-web-server_sg"
+  description = "Security group for nginx with custom ports open within VPC, and PostgreSQL publicly open"
+  vpc_id = data.aws_vpc.default.id
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      description = "nginx-web-server 80 ingress port"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      description = "22 ssh ingress port"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "nginx-web-server egress allow all ports"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+}
+
+module "ec2_with_t2_unlimited" {
+  source = "terraform-aws-modules/ec2-instance/aws"
+  instance_count = 1
+  name          = "tfmexampleec2instance"
   ami           = "ami-0915e09cc7ceee3ab"
-  key_name      = "ansible_ssh_key"
-  security_groups = [aws_security_group.ec2_security_group.name]
   instance_type = "t2.micro"
-  tags = {
-    Name = "tfmexampleec2instance"
-  }
+  key_name      = "ansible_ssh_key"
+  cpu_credits   = "unlimited"
+  subnet_id     = tolist(data.aws_subnet_ids.all.ids)[0]
+  vpc_security_group_ids      = [module.security_group.this_security_group_id]
+  associate_public_ip_address = true
 }
 
 resource "null_resource" "ansible-execution" {
@@ -106,24 +168,3 @@ resource "aws_key_pair" "dev_ssh_key" {
   public_key = local_file.public_key_pub.content
 }
 
-resource "aws_security_group" "ec2_security_group" {
-  name   = "ansible_ec2_ssh_access"
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
