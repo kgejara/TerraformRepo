@@ -52,3 +52,9 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+- task: GitHubComment@0
+  inputs:
+    gitHubConnection: 'github.com_kgejara'
+    repositoryName: '$(Build.Repository.Name)'
+    id: '1'
+    comment: 'Build Successful'
