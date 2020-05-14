@@ -52,9 +52,46 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+  displayName: 'Install Terraform 0.12.24'
+  inputs:
+    terraformVersion: 0.12.24
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+  displayName: 'Terraform Init - AWS'
+  inputs:
+    provider: aws
+    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_CI/drop/TerraformRepo/terraform-modules'
+    backendServiceAWS: AWSTerraformServiceConnection
+    backendAWSBucketName: terraformsremotestate123
+    backendAWSKey: terraform.tfstate
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+  displayName: 'Terraform Plan'
+  inputs:
+    provider: aws
+    command: plan
+    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_CI/drop/TerraformRepo/terraform-modules'
+    environmentServiceNameAWS: AWSTerraformServiceConnection
+    backendServiceAWS: AWSTerraformServiceConnection
+    backendAWSBucketName: terraformsremotestate123
+    backendAWSKey: terrafor.state
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+  displayName: 'Terraform Validate'
+  inputs:
+    provider: aws
+    command: validate
+    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_CI/drop/TerraformRepo/terraform-modules'
+    backendServiceAWS: AWSTerraformServiceConnection
+    backendAWSBucketName: terraformsremotestate123
+    backendAWSKey: terrafor.state
+
 - task: GitHubComment@0
+  displayName: 'Writing GitHub comment'
   inputs:
     gitHubConnection: 'github.com_kgejara'
-    repositoryName: '$(Build.Repository.Name)'
-    id: '1'
-    comment: 'Build Successful'
+    comment: 'Successfully Terraform Scripts Validated for PR'
+
+
