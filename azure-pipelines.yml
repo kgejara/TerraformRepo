@@ -62,7 +62,7 @@ steps:
   displayName: 'Terraform Init - AWS'
   inputs:
     provider: aws
-    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_CI/drop/TerraformRepo/terraform-modules'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_PR_CI/drop/TerraformRepo/terraform-modules'
     backendServiceAWS: AWSTerraformServiceConnection
     backendAWSBucketName: terraformsremotestate123
     backendAWSKey: terraform.tfstate
@@ -72,7 +72,7 @@ steps:
   inputs:
     provider: aws
     command: plan
-    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_CI/drop/TerraformRepo/terraform-modules'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_PR_CI/drop/TerraformRepo/terraform-modules'
     environmentServiceNameAWS: AWSTerraformServiceConnection
     backendServiceAWS: AWSTerraformServiceConnection
     backendAWSBucketName: terraformsremotestate123
@@ -83,7 +83,7 @@ steps:
   inputs:
     provider: aws
     command: validate
-    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_CI/drop/TerraformRepo/terraform-modules'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/_TerraformRepo_PR_CI/drop/TerraformRepo/terraform-modules'
     backendServiceAWS: AWSTerraformServiceConnection
     backendAWSBucketName: terraformsremotestate123
     backendAWSKey: terrafor.state
