@@ -1,0 +1,54 @@
+resources:
+  repositories:
+  - repository: AnsibleRepo
+    type: github
+    endpoint: github.com_kgejara
+    name: kgejara/AnsibleRepo
+  - repository: TerraformRepo
+    type: github
+    endpoint: github.com_kgejara
+    name: kgejara/TerraformRepo
+  - repository: ApplicationRepo
+    type: github
+    endpoint: github.com_kgejara
+    name: kgejara/ApplicationRepo
+    
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- checkout: TerraformRepo
+- checkout: AnsibleRepo
+- checkout: ApplicationRepo
+
+- script: dir $(Build.SourcesDirectory)
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'ApplicationRepo'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/ApplicationRepo'
+    OverWrite: true
+    
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'AnsibleRepo'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/AnsibleRepo'
+    OverWrite: true
+    
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'TerraformRepo'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/TerraformRepo'
+    OverWrite: true
+    
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
