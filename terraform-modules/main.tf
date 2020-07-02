@@ -196,12 +196,12 @@ resource "aws_api_gateway_integration" "integration" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 resource "aws_lambda_function" "lambda" {
-  filename      = "function.zip"
+  filename      = "../../ApplicationRepo/Code/function.zip"
   function_name = "lambda_placeholder_function"
   role          = "${aws_iam_role.iam_for_lambda.arn}"
   handler       = "lambda_function.my_handler"
   runtime = "python3.8"
-  source_code_hash = "${filebase64sha256("function.zip")}"
+  source_code_hash = "${filebase64sha256("../../ApplicationRepo/Code/function.zip")}"
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
